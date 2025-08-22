@@ -1,12 +1,15 @@
 import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { WhatsappService } from './whatsapp.service';
+import { SheetsService } from '../sheets/sheets.service';
 import type { Response } from 'express';
 
 @Controller('whatsapp')
 export class WhatsappController {
-  constructor(private readonly wa: WhatsappService) {}
+  constructor(
+    private readonly wa: WhatsappService,
+    private readonly sheetsService: SheetsService,
+  ) {}
 
-  
   @Get('webhook')
   verify(
     @Query('hub.mode') mode: string,
@@ -42,14 +45,30 @@ async webhook(@Body() body: any, @Res() res: Response) {
             console.log('<< Incoming message', { from, type: msg.type, textBody });
 
             // Auto-reply (works if 24h window is open)
-            if (from) {
-              await this.wa.sendText({
+           // 🚀 INTEGRACIÓN GOOGLE SHEETS
+           if (from && textBody) {
+              // 1. Log mensaje en Google Sheets
+              await this.sheetsService.logMessage({
+                from,
+                message: textBody,
+                timestamp: new Date(),
+                type: msg.type
+              });
+               await this.sheetsService.addUser({
+                phone: from,
+                name: 'Unknown', // WhatsApp no envía nombre automáticamente
+                status: 'active'
+              });
+
+              const config = await this.sheetsService.getConfig();
+              const keyword = textBody.toLowerCase().trim();
+              const response = config[keyword] || 'Recibido. Gracias por escribir.';
+
+               await this.wa.sendText({
                 phoneNumberId: process.env.WABA_PHONE_NUMBER_ID!,
                 token: process.env.WABA_TOKEN!,
                 to: from,
-                text: textBody
-                  ? `Recibido: "${textBody}". Gracias por escribir.`
-                  : 'Recibido. Gracias por escribir.',
+                text: response,
               });
             }
           }

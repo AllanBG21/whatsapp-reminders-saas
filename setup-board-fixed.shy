@@ -1,0 +1,220 @@
+#!/bin/bash
+
+# Configuración
+REPO="allanbarahona-web3/whatsapp-reminders-saas"
+PROJECT_TITLE="WhatsApp Reminders SaaS (MVP)"
+
+echo "🚀 Configurando GitHub Project para: $REPO"
+echo "📋 Proyecto: $PROJECT_TITLE"
+
+# Verificar que estamos en el repo correcto
+if ! git remote get-url origin | grep -q "$REPO"; then
+    echo "❌ Error: No estás en el repositorio correcto"
+    exit 1
+fi
+
+# Función para crear milestones
+create_milestones() {
+    echo "📅 Creando milestones..."
+    
+    # Sprint 1 - MVP Básico
+    gh api repos/$REPO/milestones \
+        --method POST \
+        --field title="Sprint 1 - MVP Básico" \
+        --field description="WhatsApp API + respuestas automáticas básicas" \
+        --field due_on="2025-09-03T23:59:59Z" 2>/dev/null || echo "Milestone 'Sprint 1' ya existe"
+    
+    # Sprint 2 - Integraciones
+    gh api repos/$REPO/milestones \
+        --method POST \
+        --field title="Sprint 2 - Integraciones" \
+        --field description="Google Sheets + webhooks + n8n" \
+        --field due_on="2025-09-17T23:59:59Z" 2>/dev/null || echo "Milestone 'Sprint 2' ya existe"
+    
+    # Sprint 3 - SaaS Features
+    gh api repos/$REPO/milestones \
+        --method POST \
+        --field title="Sprint 3 - SaaS Features" \
+        --field description="Dashboard + pricing + deploy" \
+        --field due_on="2025-10-01T23:59:59Z" 2>/dev/null || echo "Milestone 'Sprint 3' ya existe"
+}
+
+# Función para crear labels
+create_labels() {
+    echo "🏷️ Creando labels..."
+    
+    # Labels por tipo
+    gh label create "🚀 feature" --description "Nueva funcionalidad" --color "0075ca" 2>/dev/null || true
+    gh label create "🐛 bug" --description "Error a corregir" --color "d73a4a" 2>/dev/null || true
+    gh label create "📚 docs" --description "Documentación" --color "0052cc" 2>/dev/null || true
+    gh label create "🔧 setup" --description "Configuración inicial" --color "1d76db" 2>/dev/null || true
+    
+    # Labels por prioridad
+    gh label create "🔥 high" --description "Prioridad alta" --color "ff6b6b" 2>/dev/null || true
+    gh label create "📊 medium" --description "Prioridad media" --color "ffd93d" 2>/dev/null || true
+    gh label create "📝 low" --description "Prioridad baja" --color "6bcf7f" 2>/dev/null || true
+}
+
+# Función para crear issues del Sprint 1
+create_sprint1_issues() {
+    echo "📝 Creando issues para Sprint 1..."
+    
+    # Issue 1
+    gh issue create \
+        --title "🔧 Configuración inicial del proyecto" \
+        --body "**Descripción:**
+Configurar estructura básica del proyecto NestJS para WhatsApp SaaS
+
+**Tareas:**
+- [ ] Inicializar proyecto NestJS
+- [ ] Configurar TypeScript y linting
+- [ ] Setup de variables de entorno
+- [ ] Estructura de carpetas
+- [ ] README básico
+
+**Criterios de aceptación:**
+- Proyecto corre con \`npm start\`
+- Variables de entorno configuradas
+- Estructura clara de carpetas" \
+        --label "🔧 setup,🔥 high" \
+        --milestone "Sprint 1 - MVP Básico" || true
+    
+    # Issue 2
+    gh issue create \
+        --title "🚀 Integración WhatsApp Business API básica" \
+        --body "**Descripción:**
+Implementar conexión básica con WhatsApp Business API
+
+**Tareas:**
+- [ ] Configurar webhook para recibir mensajes
+- [ ] Implementar envío de mensajes básico
+- [ ] Validación de números de teléfono
+- [ ] Manejo de errores básico
+
+**Criterios de aceptación:**
+- Recibe mensajes de WhatsApp
+- Puede enviar respuestas automáticas
+- Logs de errores funcionando" \
+        --label "🚀 feature,🔥 high" \
+        --milestone "Sprint 1 - MVP Básico" || true
+    
+    # Issue 3
+    gh issue create \
+        --title "🚀 Sistema de respuestas automáticas" \
+        --body "**Descripción:**
+Crear sistema para responder automáticamente a mensajes
+
+**Tareas:**
+- [ ] Parser de mensajes entrantes
+- [ ] Motor de respuestas automáticas
+- [ ] Configuración de respuestas default
+- [ ] Testing básico
+
+**Criterios de aceptación:**
+- Responde automáticamente a palabras clave
+- Respuesta default para mensajes no reconocidos
+- Testing unitario básico" \
+        --label "🚀 feature,📊 medium" \
+        --milestone "Sprint 1 - MVP Básico" || true
+}
+
+# Función para crear issues del Sprint 2
+create_sprint2_issues() {
+    echo "📝 Creando issues para Sprint 2..."
+    
+    # Issue 4
+    gh issue create \
+        --title "🚀 Integración con Google Sheets" \
+        --body "**Descripción:**
+Conectar WhatsApp con Google Sheets para logging y configuración
+
+**Tareas:**
+- [ ] Configurar Google Sheets API
+- [ ] Endpoint para escribir mensajes en sheet
+- [ ] Leer configuraciones desde sheet
+- [ ] Manejo de errores de API
+
+**Criterios de aceptación:**
+- Mensajes se guardan en Google Sheets
+- Configuraciones se leen desde sheet
+- Manejo de rate limits" \
+        --label "🚀 feature,🔥 high" \
+        --milestone "Sprint 2 - Integraciones" || true
+    
+    # Issue 5
+    gh issue create \
+        --title "🚀 Sistema de webhooks configurables" \
+        --body "**Descripción:**
+Implementar webhooks para integraciones externas
+
+**Tareas:**
+- [ ] Endpoint para recibir webhooks
+- [ ] Sistema de envío de webhooks
+- [ ] Configuración de URLs de destino
+- [ ] Retry logic para fallos
+
+**Criterios de aceptación:**
+- Recibe webhooks externos
+- Envía data a URLs configuradas
+- Retry automático en fallos" \
+        --label "🚀 feature,📊 medium" \
+        --milestone "Sprint 2 - Integraciones" || true
+}
+
+# Función para crear issues del Sprint 3
+create_sprint3_issues() {
+    echo "📝 Creando issues para Sprint 3..."
+    
+    # Issue 6
+    gh issue create \
+        --title "🚀 Dashboard básico para configuración" \
+        --body "**Descripción:**
+Crear interfaz web para configurar el bot de WhatsApp
+
+**Tareas:**
+- [ ] Frontend básico (React/HTML)
+- [ ] Configuración de respuestas automáticas
+- [ ] Visualización de mensajes recibidos
+- [ ] Configuración de integraciones
+
+**Criterios de aceptación:**
+- Interface web funcional
+- CRUD de respuestas automáticas
+- Dashboard responsive" \
+        --label "🚀 feature,📊 medium" \
+        --milestone "Sprint 3 - SaaS Features" || true
+    
+    # Issue 7
+    gh issue create \
+        --title "🚀 Sistema de pricing y planes" \
+        --body "**Descripción:**
+Implementar diferentes planes de pricing para el SaaS
+
+**Tareas:**
+- [ ] Modelos de planes (Free, Pro, Enterprise)
+- [ ] Límites por plan (mensajes/mes)
+- [ ] Sistema de billing básico
+- [ ] Upgrade/downgrade de planes
+
+**Criterios de aceptación:**
+- 3 planes claramente definidos
+- Límites se respetan automáticamente
+- Flujo de upgrade funcional" \
+        --label "🚀 feature,📝 low" \
+        --milestone "Sprint 3 - SaaS Features" || true
+}
+
+# Ejecutar todo
+echo "🎯 Iniciando setup del proyecto..."
+create_milestones
+create_labels
+create_sprint1_issues
+create_sprint2_issues
+create_sprint3_issues
+
+echo ""
+echo "✅ ¡Setup completado!"
+echo "👉 Ve a: https://github.com/$REPO/issues"
+echo "📋 Proyecto: https://github.com/$REPO/projects"
+echo ""
+echo "🚀 ¡Ya puedes empezar a trabajar en tu primer sprint!"

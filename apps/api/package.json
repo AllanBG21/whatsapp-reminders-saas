@@ -25,6 +25,8 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "axios": "^1.11.0",
+    "google-auth-library": "^10.2.1",
+    "googleapis": "^156.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
